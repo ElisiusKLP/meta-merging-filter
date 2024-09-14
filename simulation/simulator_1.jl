@@ -1,4 +1,41 @@
-module Simulator
+"""
+
+This simulation models a scenario where auditory and visual stimuli are 
+emitted from sources moving along a predefined azimuth range, typically 
+set between -22 and +22 degrees. Each time step simulates the positions 
+of three source points along this azimuth: one common source emitting 
+both auditory and visual signals, and two independent sources emitting 
+only one signal type each.
+
+## Key Parameters:
+- **Azimuth Range**: Defines the angular space for the sources, 
+  bounded by a minimum (e.g., -22 degrees) and maximum (e.g., +22 degrees) value.
+- **Number of Timesteps**: Specifies how many steps the simulation will run.
+- **Common Source Probability**: Predefined probability of signals 
+  coming from the common source at each timestep.
+- **Source Movement**: Each source follows a Gaussian random walk, 
+  updating its position with added Gaussian noise at each timestep.
+- **Gaussian Noise**: The common source emits auditory and visual signals 
+  with Gaussian noise around the source's true position, simulating 
+  imprecision in the signals.
+
+## Simulation Steps:
+1. **Initialization**: Three sources are randomly initialized within 
+   the azimuth range, with one common source and two independent sources.
+2. **Timestep Simulation**: 
+   - For each timestep, a random decision determines whether the signals 
+     are emitted from the common or independent sources.
+   - Each source's position is updated using a Gaussian random walk, 
+     with reflective boundaries at the azimuth limits.
+   - The positions of auditory and visual signals are recorded for each step.
+3. **Recording Data**: The auditory and visual signal positions are stored, 
+   along with whether the signals were sourced from a common or independent 
+   source.
+4. **Output**: The simulation generates a time series of auditory and 
+   visual signal positions for analysis or visualization.
+"""
+
+module simulator_1
 
 using Random, Distributions
 
