@@ -122,8 +122,8 @@ function merging_hgf(
         sA_hat = posterior_C * FF_inferred_location + (1 - posterior_C) * Ind_inferred_auditory_location
         sV_hat = posterior_C * FF_inferred_location + (1 - posterior_C) * Ind_inferred_visual_location
 
-        print("sA_hat: $sV_hat")
-        print("sV_hat: $sA_hat")
+        print("sA_hat: $sA_hat")
+        print("sV_hat: $sV_hat")
         
     end
     

@@ -8,6 +8,7 @@ using Turing
 ---------------------------
 """
 
+""" 1. init the BCI model/agent"""
 # loading in "original_action_model"
 include("/work/HGF/bachelor_repo/action_functions/bci_action.jl")
 
@@ -66,7 +67,7 @@ get_parameters(agent)
 using CSV
 using DataFrames
 
-file_path = "/work/HGF/simulation/sim_data/data_sim1_2024-09-14_174512.csv"
+file_path = "/work/HGF/simulation/sim_data/data_sim1_2024-09-15_153835.csv"
 
 # Load the CSV file into a DataFrame
 df = CSV.read(file_path, DataFrame)
@@ -78,12 +79,31 @@ rename!(df, Dict(col => lowercase(col) for col in names(df)))
 println("First few rows of the DataFrame:")
 println(first(df, 5))
 
-input_vector = Vector{Tuple{Float64, Float64}}()
-
+input_vector =[]
 # Create the vector using comprehension
-input_vector = [(row.auditory_position, row.visual_position) for row in eachrow(df)]
+input_vector = [ [row.auditory_position, row.visual_position] for row in eachrow(df) ]
 
 """ 3. give input data to agent """
 
-give_inputs!(agent, inputs)
-get_history(agent)
+give_inputs!(agent, input_vector)
+agent_history = get_history(agent)
+action_history = agent_history["action"][2:end]
+
+""" 4. Plot simulation results """
+
+agent_history
+
+using Plots
+
+auditory_input = 
+visual_input =
+
+# First plot: Audio-visual input time series
+p1 = plot(time, auditory_input, label="Auditory Input", xlabel="Time", ylabel="Azimuth", color=:blue, linewidth=2)
+plot!(time, visual_input, label="Visual Input", color=:red, linewidth=2)
+
+# Second plot: Scatter plot for auditory response
+p2 = scatter(response_time, auditory_response, label="Auditory Response", xlabel="Time", ylabel="Azimuth", color=:green, marker=:circle)
+
+# Combine the two plots vertically
+plot(p1, p2, layout = @layout([a; b]), size=(800, 600), title="Audio-Visual Input and Auditory Response")

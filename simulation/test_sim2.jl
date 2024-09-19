@@ -3,16 +3,20 @@ using Plots
 using .simulator_2
 
 # Parameters
-n_timesteps = 2000
+n_timesteps = 3000
 azimuth_min = -22.0
 azimuth_max = 22.0
 prob_common = 0.3
 noise_std = 2.5
 signal_noise_std = 1.0
 initial_bound_std = 1.0
-boundary_timesteps = [500, 1000, 1500]
-boundary_std_values = [1.0, 10.0, 1.5]
+boundary_timesteps = [500, 1000, 1500, 2500]
+boundary_std_values = [3.0, 1.0, 10, 1]
 
+# Ensure boundary_timesteps and boundary_std_values are of the same length
+if length(boundary_timesteps) != length(boundary_std_values)
+    error("boundary_timesteps and boundary_std_values must have the same length")
+end
 
 # Run the simulation
 signal_data, boundary_std_data = simulator_2.simulate_experiment_with_discrete_boundary(
@@ -77,18 +81,58 @@ colors = [:blue, :red] # Blue for common, Red for independent
 markers = [:square, :triangle] # Square for common, Triangle for independent
 
 # Create plots for signals
-p1 = plot(timestamps, auditory_independent, seriestype = :line, color = colors[1], marker = markers[1], label = "Independent Auditory", legend = :topright)
-plot!(p1, timestamps, visual_independent, seriestype = :line, color = colors[2], marker = markers[2], label = "Independent Visual")
+p1 = plot(timestamps, auditory_independent, seriestype = :scatter, color = colors[1], marker = markers[2], label = "Independent Auditory", legend = :topright)
+plot!(p1, timestamps, visual_independent, seriestype = :scatter, color = colors[2], marker = markers[2], label = "Independent Visual",
+        xlabel="Timestep",
+        ylabel="Signal Location",
+        title = "Independent auditory and visual signals")
 
-p2 = plot(timestamps, auditory_common, seriestype = :line, color = colors[1], marker = markers[1], label = "Common Auditory", legend = :topright)
-plot!(p2, timestamps, visual_common, seriestype = :line, color = colors[2], marker = markers[2], label = "Common Visual")
+p2 = plot(timestamps, auditory_common, seriestype = :scatter, color = colors[1], marker = markers[1], label = "Common Auditory", legend = :topright)
+plot!(p2, timestamps, visual_common, seriestype = :scatter, color = colors[2], marker = markers[1], label = "Common Visual",
+        xlabel="Timestep",
+        ylabel="Signal Location",
+        title = "Common auditory and visual signals")
 
 # Add shaded region (using ribbon to shade the boundary)
-p3 = plot(timestamps, common_source_position_array, ribbon = (bounds_high, bounds_low), 
+#=p3 = plot(timestamps, common_source_position_array, ribbon = (bounds_high, bounds_low), 
     fillalpha = 0.2, color = :blue, label = "Boundary Std Dev")
+=#
 
 # Additional plot for boundary standard deviation over time
-p4 = plot(timestamps, boundary_std_array, seriestype = :line, color = :green, label = "Boundary Std Dev", legend = :topright, title="Boundary Std Over Time")
+p3 = plot(timestamps, boundary_std_array, seriestype = :line, color = :green, label = "Boundary Std Dev", legend = :topright, 
+        title="Boundary Std Over Time",
+        xlabel = "Timestep",
+        ylabel = "Boundary SD")
 
-# Combine plots
-plot(p1, p2, p3, p4, layout = (4, 1), xlabel = "Timestep", ylabel = "Signal Location", title = "Auditory and Visual Signals with Dynamic Bound", size = (800, 800))
+
+
+# Create a plot for parameter annotation (empty plot with text)
+parameters_text = "Parameters:\n" *
+    "Timesteps: $n_timesteps\n" *
+    "Azimuth Range: [$azimuth_min, $azimuth_max]\n" *
+    "Probability of Common cause: $prob_common\n" *
+    "Random walk Noise Std Dev: $noise_std\n" *
+    "Signal (sampling) Noise Std Dev: $signal_noise_std\n" *
+    "Initial Bound Std Dev: $initial_bound_std\n" *
+    "Boundary Timesteps: $boundary_timesteps\n" *
+    "Boundary Std Values: $boundary_std_values\n"
+
+
+# Create a blank plot for parameters without axes or grid
+p4 = plot(legend = false, grid = false, frame = :none, xaxis = false, yaxis = false, size=(800, 200))
+annotate!(p4, (0.05, 0.5, text(parameters_text, 10, :black, halign = :left)))
+
+# Create a blank plot for the main title
+main_title_plot = plot(legend = false, grid = false, frame = :none, xaxis = false, yaxis = false, size=(800, 100))
+annotate!(main_title_plot, (0.5, 0.5, 
+            text("Simulation with dynamic boundary", 
+            15, :black, halign = :center, valign = :center)))
+annotate!(main_title_plot, (0.5, 0.1, 
+            text("If independent cause is picked, A and V signals are sampled from a gaussian boundary around
+            the common cause source", 
+            10, :black, halign = :center, valign = :center)))
+
+# Combine all plots with the title at the top
+p = plot(main_title_plot, p1, p2, p3, p4, layout = (5, 1), size = (800, 900))
+
+display(p)
